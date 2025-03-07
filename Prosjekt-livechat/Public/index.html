@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        #chat { margin: 20px; }
+        #messages { list-style-type: none; padding: 0; }
+        #messages li { padding: 8px; background: #f1f1f1; margin-bottom: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <input id="username" type="text" placeholder="Skriv inn brukernavn" />
+        <ul id="messages"></ul>
+        <form id="form" action="">
+            <input id="input" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        const usernameInput = document.getElementById('username');
+
+        let username = "";
+
+        // Når brukeren skriver inn et brukernavn
+        usernameInput.addEventListener('change', () => {
+            username = usernameInput.value.trim();
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value && username) {
+                socket.emit('chat message', { user: username, message: input.value });
+                input.value = '';
+            } else {
+                alert("Skriv inn et brukernavn før du sender en melding!");
+            }
+        });
+
+        socket.on('chat message', function(data) {
+            const item = document.createElement('li');
+            item.textContent = `${data.user}: ${data.message}`;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+</html>
